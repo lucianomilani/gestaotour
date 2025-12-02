@@ -86,5 +86,52 @@ bash
 git clone https://github.com/lucianomilani/gestaotour.git
 cd gestaotour
 
+Aqui está o código Markdown formatado exatamente para o trecho que você pediu.
+
+**Copie o bloco abaixo e cole no final do seu arquivo:**
+
+```
+
+### 2. Instalar Dependências
+Instale as bibliotecas necessárias listadas no `package.json`:
+
+```bash
+npm install
+```
+
+### 3. Configurar Variáveis (.env.local)
+Crie um arquivo chamado `.env.local` na raiz do projeto e insira suas credenciais:
+
+```env
+# Chaves de API
+GEMINI_API_KEY=sua_chave_aqui
+NEXT_PUBLIC_SUPABASE_URL=sua_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave
+```
+
+### 4. Executar
+Inicie o servidor de desenvolvimento local:
+
+```bash
+npm run dev
+```
+
+Acesse o projeto em seu navegador: [http://localhost:3000](http://localhost:3000)
+
 ---
 
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Se você tem ideias para novos módulos ou melhorias no dashboard, siga o fluxo abaixo:
+
+1.  Faça um **Fork** do projeto.
+2.  Crie uma Branch para sua funcionalidade (`git checkout -b feature/NovaFuncionalidade`).
+3.  Commit suas mudanças (`git commit -m 'feat: Adiciona gráfico de churn'`).
+4.  Faça o Push para a Branch (`git push origin feature/NovaFuncionalidade`).
+5.  Abra um **Pull Request**.
+
+---
+
+<div align="center">
+  <sub>Desenvolvido por <a href="https://github.com/lucianomilani">Luciano Milani</a></sub>
+</div>
