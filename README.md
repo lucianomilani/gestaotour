@@ -35,7 +35,7 @@ O sistema utiliza Inteligência Artificial para auxiliar na tomada de decisão, 
 ## 🖥️ Destaques da Interface
 
 ### 📊 Cockpit de Gestão (Visível no Topo)
-O painel principal (visto acima) oferece uma visão macro do negócio.
+O painel principal oferece uma visão macro do negócio.
 *   **KPIs em Tempo Real:** Receita Total, Reservas Pendentes e Taxa de Ocupação.
 *   **Analytics:** Gráficos de tendência para identificar picos de venda (Sazonalidade).
 *   **Alertas de Lotação:** Avisos visuais automáticos quando um tour atinge capacidade crítica.
@@ -76,35 +76,45 @@ Construído sobre uma arquitetura moderna e escalável:
 
 ## ⚡ Quick Start
 
-Traga a operação para sua máquina local em minutos.
+Traga a operação para sua máquina local em minutos seguindo estas etapas.
 
 ### 1. Clonar Repositório
+Baixe o código fonte para sua máquina:
 ```bash
 git clone https://github.com/lucianomilani/gestaotour.git
 cd gestaotour
-2. Instalar Dependências
+
+### 2. Instalar Dependências
+Instale as bibliotecas necessárias listadas no package.json:
 code
 Bash
 npm install
-3. Configurar Variáveis (.env.local)
-Crie o arquivo na raiz do projeto:
+
+###3. Configurar Variáveis (.env.local)
+Crie um arquivo chamado .env.local na raiz do projeto e insira suas credenciais:
 code
 Env
+# Chaves de API
 GEMINI_API_KEY=sua_chave_aqui
 NEXT_PUBLIC_SUPABASE_URL=sua_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave
-4. Executar
+
+### 4. Executar
+Inicie o servidor de desenvolvimento local:
 code
 Bash
 npm run dev
-Acesse: http://localhost:3000
-🤝 Contribuição
-Contribuições são bem-vindas! Se você tem ideias para novos módulos ou melhorias no dashboard:
-Faça um Fork.
-Crie uma Branch (git checkout -b feature/NovaFeature).
-Commit (git commit -m 'feat: Adiciona gráfico de churn').
-Push (git push origin feature/NovaFeature).
+
+Acesse o projeto em seu navegador: http://localhost:3000
+
+### 🤝 Contribuição
+Contribuições são bem-vindas! Se você tem ideias para novos módulos ou melhorias no dashboard, siga o fluxo abaixo:
+Faça um Fork do projeto.
+Crie uma Branch para sua funcionalidade (git checkout -b feature/NovaFuncionalidade).
+Commit suas mudanças (git commit -m 'feat: Adiciona gráfico de churn').
+Faça o Push para a Branch (git push origin feature/NovaFuncionalidade).
 Abra um Pull Request.
+
 <div align="center">
 <sub>Desenvolvido por <a href="https://github.com/lucianomilani">Luciano Milani</a></sub>
 </div>
