@@ -1,80 +1,114 @@
 <div align="center">
-  <img width="1200" height="475" alt="GestãoTour Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <!-- Banner Conceitual -->
+  <img width="1200" height="350" src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop" alt="GestãoTour Banner" style="border-radius: 12px; object-fit: cover;" />
+
+  <br /> <br />
 
   # 🌍 GestãoTour
   
-  **Otimização Inteligente de Rotas e Experiências Turísticas**
+  **Plataforma Inteligente para Gestão de Turismo e Experiências**
   
   [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-green?style=flat&logo=node.js)](https://nodejs.org/)
   [![AI Powered](https://img.shields.io/badge/AI-Gemini-blue?style=flat&logo=google-gemini)](https://ai.google.dev/)
+  [![UI](https://img.shields.io/badge/Interface-Dark_Mode-black?style=flat&logo=vercel)]()
   [![Database](https://img.shields.io/badge/Supabase-Enabled-emerald?style=flat&logo=supabase)](https://supabase.com/)
-  [![Status](https://img.shields.io/badge/Status-Development-orange?style=flat)]()
 
+  <p>
+    <a href="https://ai.studio/apps/drive/1Q90Vp4q7NmqyltY9Rk4eshYc2iUKGlou">
+      <b>🔗 Visualizar App no Google AI Studio</b>
+    </a>
+  </p>
 </div>
 
 ---
 
-## 🚀 Sobre o Projeto
+## 📖 Visão Geral
 
-O **GestãoTour** é uma aplicação projetada para modernizar a administração de tours e roteiros turísticos. Utilizando o poder da Inteligência Artificial (Google Gemini), o sistema auxilia na criação, organização e otimização de experiências para viajantes e agências.
+O **GestãoTour** é uma solução "All-in-One" projetada para modernizar agências de turismo e organizadores de eventos. Focada em performance e UX (Experiência do Usuário), a plataforma substitui planilhas complexas por um **Dashboard Intuitivo** e um **Calendário Interativo**.
 
-### ✨ Principais Funcionalidades
-- **Assistência via AI:** Integração com Gemini para sugestões e análises.
-- **Gestão de Dados:** Backend robusto para controle de clientes e roteiros.
-- **Interface Moderna:** Focada na experiência do usuário (UX).
+O sistema utiliza Inteligência Artificial para auxiliar na tomada de decisão, monitoramento de receita e gestão de capacidade.
+
+---
+
+## 🖥️ Tour pela Aplicação
+
+Veja como o GestãoTour transforma dados em decisões.
+
+### 📊 Dashboard Estratégico (Cockpit)
+Uma visão macro do negócio em tempo real. O painel apresenta KPIs vitais como **Receita Total**, **Reservas Pendentes** e **Taxa de Ocupação**.
+*   **Analytics:** Gráficos de tendência para identificar picos de venda (Sazonalidade).
+*   **Alertas de Lotação:** Avisos visuais automáticos quando um tour atinge capacidade crítica (ex: "Lotação Alta - 90%").
+
+<div align="center">
+  <!-- Certifique-se de salvar a imagem como 'dashboard.png' na pasta 'assets' -->
+  <img src="./assets/dashboard.png" alt="Dashboard de Reservas GestãoTour" width="100%" style="border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+</div>
+
+<br>
+
+### 🗓️ Calendário de Aventuras
+Organização visual completa. A visualização mensal permite arrastar e gerenciar eventos com facilidade.
+*   **Status Color-Coded:** Identificação rápida de tipos de passeios (Gastronômico, Aventura, Relaxamento).
+*   **Painel Lateral:** Resumo rápido dos próximos eventos e previsões de receita do mês.
+
+<div align="center">
+  <!-- Certifique-se de salvar a imagem como 'calendar.png' na pasta 'assets' -->
+  <img src="./assets/calendar.png" alt="Calendário de Eventos GestãoTour" width="100%" style="border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+</div>
+
+---
+
+## ✨ Funcionalidades Principais
+
+*   **🌑 Dark Mode Nativo:** Interface moderna que reduz a fadiga visual e destaca as informações críticas com acentos em verde neon.
+*   **💰 Controle Financeiro:** Monitoramento preciso de entradas (€), com distinção clara entre reservas pagas e pendentes.
+*   **🧠 Integração AI (Gemini):** Otimização de roteiros e sugestões baseadas no histórico de reservas.
+*   **👥 Gestão de Participantes:** Controle granular de vagas (ex: 18/20 vagas preenchidas).
 
 ---
 
 ## 🛠️ Tech Stack
 
-Este projeto foi construído sobre ombros de gigantes (e um pouco de antigravidade):
+Construído sobre uma arquitetura moderna e escalável:
 
-- **Runtime:** Node.js
-- **Inteligência Artificial:** Google Gemini API
-- **Banco de Dados/Backend:** Supabase (PostgreSQL)
-- **Gerenciador de Pacotes:** NPM
+*   **Frontend:** React / Next.js
+*   **Estilização:** Tailwind CSS (Design System)
+*   **Backend & Auth:** Supabase (PostgreSQL)
+*   **AI Engine:** Google Gemini API
 
 ---
 
-## ⚡ Quick Start (Instalação)
+## ⚡ Quick Start
 
-Siga os passos abaixo para levantar o ambiente de desenvolvimento localmente.
+Traga a operação para sua máquina local em minutos.
 
-### 1. Pré-requisitos
-Certifique-se de ter o **Node.js** instalado em sua máquina.
-
-### 2. Instalação
-Clone o repositório e instale as dependências (com *batteries included*):
-
+### 1. Clonar Repositório
 ```bash
 git clone https://github.com/lucianomilani/gestaotour.git
 cd gestaotour
+2. Instalar Dependências
+code
+Bash
 npm install
-
-3. Configuração de Ambiente (.env)
-A segurança é prioridade. Crie um arquivo .env.local na raiz do projeto e configure suas chaves.
-Nota: Nunca suba este arquivo para o GitHub.
+3. Configurar Variáveis (.env.local)
+Crie o arquivo na raiz do projeto:
 code
 Env
-# Exemplo de configuração
-GEMINI_API_KEY=sua_chave_gemini_aqui
-# Adicione outras chaves necessárias (ex: Supabase)
-NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_publica_supabase
-4. Decolagem 🛫
-Inicie o servidor de desenvolvimento:
+GEMINI_API_KEY=sua_chave_aqui
+NEXT_PUBLIC_SUPABASE_URL=sua_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave
+4. Executar
 code
 Bash
 npm run dev
-Acesse o projeto em: http://localhost:3000 (ou a porta indicada no terminal).
+Acesse: http://localhost:3000
 🤝 Contribuição
-Contribuições são bem-vindas! Se você tiver uma ideia para melhorar o módulo de "antigravidade" ou corrigir um bug:
-Faça um Fork do projeto.
-Crie uma Branch (git checkout -b feat/MinhaFeature).
-Commit suas mudanças (git commit -m 'feat: Adiciona funcionalidade X').
-Faça o Push (git push origin feat/MinhaFeature).
+Contribuições são bem-vindas! Se você tem ideias para novos módulos ou melhorias no dashboard:
+Faça um Fork.
+Crie uma Branch (git checkout -b feature/NovaFeature).
+Commit (git commit -m 'feat: Adiciona gráfico de churn').
+Push (git push origin feature/NovaFeature).
 Abra um Pull Request.
-
 <div align="center">
 <sub>Desenvolvido por <a href="https://github.com/lucianomilani">Luciano Milani</a></sub>
 </div>
