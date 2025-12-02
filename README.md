@@ -1,13 +1,15 @@
 <div align="center">
-  <!-- Banner Conceitual -->
-  <img width="1200" height="350" src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop" alt="GestãoTour Banner" style="border-radius: 12px; object-fit: cover;" />
-
-  <br /> <br />
-
-  # 🌍 GestãoTour
+  <h1>🌍 GestãoTour</h1>
   
-  **Plataforma Inteligente para Gestão de Turismo e Experiências**
-  
+  <h3>Plataforma Inteligente para Gestão de Turismo e Experiências</h3>
+
+  <br />
+
+  <!-- Banner Principal: Dashboard (Produto Real) -->
+  <img src="./assets/dashboard.png" alt="Dashboard GestãoTour" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+
+  <br /><br />
+
   [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-green?style=flat&logo=node.js)](https://nodejs.org/)
   [![AI Powered](https://img.shields.io/badge/AI-Gemini-blue?style=flat&logo=google-gemini)](https://ai.google.dev/)
   [![UI](https://img.shields.io/badge/Interface-Dark_Mode-black?style=flat&logo=vercel)]()
@@ -24,35 +26,29 @@
 
 ## 📖 Visão Geral
 
-O **GestãoTour** é uma solução "All-in-One" projetada para modernizar agências de turismo e organizadores de eventos. Focada em performance e UX (Experiência do Usuário), a plataforma substitui planilhas complexas por um **Dashboard Intuitivo** e um **Calendário Interativo**.
+O **GestãoTour** é uma solução "All-in-One" projetada para modernizar agências de turismo e organizadores de eventos. Focada em performance e UX (Experiência do Usuário), a plataforma substitui planilhas complexas por uma interface visual intuitiva.
 
-O sistema utiliza Inteligência Artificial para auxiliar na tomada de decisão, monitoramento de receita e gestão de capacidade.
+O sistema utiliza Inteligência Artificial para auxiliar na tomada de decisão, monitoramento de receita e gestão de capacidade em tempo real.
 
 ---
 
-## 🖥️ Tour pela Aplicação
+## 🖥️ Destaques da Interface
 
-Veja como o GestãoTour transforma dados em decisões.
-
-### 📊 Dashboard Estratégico (Cockpit)
-Uma visão macro do negócio em tempo real. O painel apresenta KPIs vitais como **Receita Total**, **Reservas Pendentes** e **Taxa de Ocupação**.
+### 📊 Cockpit de Gestão (Visível no Topo)
+O painel principal (visto acima) oferece uma visão macro do negócio.
+*   **KPIs em Tempo Real:** Receita Total, Reservas Pendentes e Taxa de Ocupação.
 *   **Analytics:** Gráficos de tendência para identificar picos de venda (Sazonalidade).
-*   **Alertas de Lotação:** Avisos visuais automáticos quando um tour atinge capacidade crítica (ex: "Lotação Alta - 90%").
-
-<div align="center">
-  <!-- Certifique-se de salvar a imagem como 'dashboard.png' na pasta 'assets' -->
-  <img src="./assets/dashboard.png" alt="Dashboard de Reservas GestãoTour" width="100%" style="border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-</div>
+*   **Alertas de Lotação:** Avisos visuais automáticos quando um tour atinge capacidade crítica.
 
 <br>
 
 ### 🗓️ Calendário de Aventuras
-Organização visual completa. A visualização mensal permite arrastar e gerenciar eventos com facilidade.
+Organização visual completa para o dia a dia. A visualização mensal permite arrastar e gerenciar eventos com facilidade.
 *   **Status Color-Coded:** Identificação rápida de tipos de passeios (Gastronômico, Aventura, Relaxamento).
 *   **Painel Lateral:** Resumo rápido dos próximos eventos e previsões de receita do mês.
 
 <div align="center">
-  <!-- Certifique-se de salvar a imagem como 'calendar.png' na pasta 'assets' -->
+  <!-- Certifique-se de que a imagem calendar.png está na pasta assets -->
   <img src="./assets/calendar.png" alt="Calendário de Eventos GestãoTour" width="100%" style="border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
 </div>
 
