@@ -1,0 +1,17 @@
+[dotenv@17.2.3] injecting env (2) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Starting database seed...
+Seeding Agencies...
+Agency Viagens Norte already exists.
+Agency GetYourGuide already exists.
+Agency Airbnb Experiences already exists.
+Agency Booking.com already exists.
+Agency MLTours already exists.
+Seeding Adventures...
+Adventure Trilho do Sol already exists.
+Adventure Kayak no Rio already exists.
+Adventure Escalada Montanha already exists.
+Adventure Observação de Aves already exists.
+Adventure Passeio de Barco already exists.
+Adventure Tour Gastronómico already exists.
+Adventure Trilho dos Passadiços already exists.
+Seeding completed!

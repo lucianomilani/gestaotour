@@ -1,9 +1,12 @@
+import { Role, Permission } from './utils/permissions';
+
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'staff';
+  role: Role;
   avatar?: string;
+  permissions?: Permission[];
 }
 
 export interface Booking {
@@ -19,6 +22,8 @@ export interface Booking {
   location?: string;
   country?: string;
   time?: string;
+  duration?: string;
+  paymentStatus?: string;
 }
 
 export interface Metric {
@@ -39,4 +44,52 @@ export interface NavItem {
   icon: string;
   path: string;
   active?: boolean;
+}
+
+export interface Staff {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'Administrador' | 'Gestor' | 'Guia' | 'Condutor';
+  nif?: string;
+  notes: string;
+  isActive: boolean;
+  auth_id?: string; // Link to Supabase Auth user
+}
+
+export interface Agency {
+  id: string;
+  code: string;
+  name: string;
+  nif: string;
+  email: string;
+  phone: string;
+  contact: string;
+  fee: number;
+  iban?: string;
+  isActive: boolean;
+}
+
+export interface SeasonConfig {
+  start: string;
+  end: string;
+  times: string[];
+}
+
+export interface Adventure {
+  id: string;
+  name: string;
+  description: string;
+  location: string;
+  meetingPoint: string;
+  duration: string;
+  priceAdult: number;
+  priceChild: number;
+  priceBaby: number;
+  minCapacity: number | null;  // null = no minimum
+  maxCapacity: number | null;  // null = unlimited
+  isActive: boolean;
+  highSeason: SeasonConfig;
+  lowSeason: SeasonConfig;
 }

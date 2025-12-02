@@ -19,9 +19,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({ label, value, change, is
   );
 };
 
-export const TopAdventureRow: React.FC<{name: string, count: string | number}> = ({name, count}) => (
-    <div className="flex items-center justify-between text-sm py-2 border-b border-gray-100 dark:border-white/5 last:border-0">
-        <span className="text-gray-700 dark:text-gray-300">{name}</span>
-        <span className="font-semibold text-gray-900 dark:text-white">{count}</span>
-    </div>
+export const TopAdventureRow: React.FC<{ name: string, count: string | number }> = ({ name, count }) => (
+  <div className="flex items-center justify-between text-sm py-2 border-b border-gray-100 dark:border-white/5 last:border-0">
+    <span className="text-gray-700 dark:text-gray-300">{name}</span>
+    <span className="font-semibold text-gray-900 dark:text-white">{count}</span>
+  </div>
 );

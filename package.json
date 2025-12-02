@@ -6,9 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:functions": "supabase functions deploy create-user",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
@@ -17,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "supabase": "^2.64.2",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

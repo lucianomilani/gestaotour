@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { mockBookings } from '../services/mockData';
+import { formatDatePT } from '../utils/dateFormat';
+import { supabase } from '../services/supabase';
+import { Booking } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 export const BookingsList: React.FC = () => {
     const navigate = useNavigate();
+    const { canEdit } = useAuth();
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [allAdventures, setAllAdventures] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     // Filters State
     const [statusFilter, setStatusFilter] = useState('Todos');
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState('Todos');
     const [adventureFilter, setAdventureFilter] = useState('Todas');
     const [cityFilter, setCityFilter] = useState('Todas');
     const [countryFilter, setCountryFilter] = useState('Todos');
@@ -22,19 +29,86 @@ export const BookingsList: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    // Fetch Data
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+
+            // Fetch Bookings
+            const { data: bookingsData, error: bookingsError } = await supabase
+                .from('bookings')
+                .select(`
+                    *,
+                    agency: agencies(name),
+                    adventure: adventures(name)
+                `)
+                .order('created_at', { ascending: false });
+
+            if (bookingsError) throw bookingsError;
+
+            // Fetch Adventures for Filter
+            const { data: adventuresData, error: adventuresError } = await supabase
+                .from('adventures')
+                .select('name')
+                .order('name');
+
+            if (adventuresError) throw adventuresError;
+
+            if (adventuresData) {
+                setAllAdventures(adventuresData.map(a => a.name));
+            }
+
+            const mappedBookings: Booking[] = (bookingsData || []).map(item => ({
+                id: item.id,
+                clientName: item.client_name,
+                clientEmail: item.client_email,
+                clientPhone: item.client_phone,
+                clientNif: item.client_nif,
+                city: item.client_city,
+                country: item.client_country,
+                adventureName: item.adventure?.name || 'Desconhecida',
+                agency: item.agency?.name || 'Particular',
+                startDate: item.date,
+                time: item.time,
+                adults: item.adults,
+                children: item.children,
+                babies: item.babies,
+                participants: (item.adults || 0) + (item.children || 0) + (item.babies || 0),
+                status: item.status,
+                paymentStatus: item.payment_status,
+                totalValue: item.total_amount,
+                deposit: item.deposit_amount,
+                notes: item.notes,
+                location: item.client_city,
+                endDate: item.date
+            }));
+
+            setBookings(mappedBookings);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     // Derive Unique Lists for Dropdowns
-    const uniqueLocations = [...new Set(mockBookings.map(b => b.location).filter(Boolean))];
-    const uniqueCountries = [...new Set(mockBookings.map(b => b.country).filter(Boolean))];
-    const uniqueAgencies = [...new Set(mockBookings.map(b => b.agency).filter(Boolean))];
+    const uniqueLocations = [...new Set(bookings.map(b => b.location).filter(Boolean))];
+    const uniqueCountries = [...new Set(bookings.map(b => b.country).filter(Boolean))];
+    const uniqueAgencies = [...new Set(bookings.map(b => b.agency).filter(Boolean))];
 
     // Filter Logic
-    const filteredBookings = mockBookings.filter(booking => {
+    const filteredBookings = bookings.filter(booking => {
         // Text Search (Name, ID)
         const matchesSearch = booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            booking.id.includes(searchTerm);
+            booking.id.toLowerCase().includes(searchTerm.toLowerCase());
 
         // Dropdown Filters
         const matchesStatus = statusFilter === 'Todos' || booking.status === statusFilter;
+        const matchesPaymentStatus = paymentStatusFilter === 'Todos' || booking.paymentStatus === paymentStatusFilter;
         const matchesAdventure = adventureFilter === 'Todas' || booking.adventureName === adventureFilter;
         const matchesCity = cityFilter === 'Todas' || booking.location === cityFilter;
         const matchesCountry = countryFilter === 'Todos' || booking.country === countryFilter;
@@ -43,21 +117,18 @@ export const BookingsList: React.FC = () => {
         // Date Range Filter
         let matchesDate = true;
         if (startDate || endDate) {
-            // booking.startDate is YYYY-MM-DD (from mockData)
-            // If it was DD/MM/YYYY we would need conversion, but mockData uses ISO-like YYYY-MM-DD
             const bookingDateISO = booking.startDate;
-
             if (startDate && bookingDateISO < startDate) matchesDate = false;
             if (endDate && bookingDateISO > endDate) matchesDate = false;
         }
 
-        return matchesSearch && matchesStatus && matchesAdventure && matchesCity && matchesCountry && matchesAgency && matchesDate;
+        return matchesSearch && matchesStatus && matchesPaymentStatus && matchesAdventure && matchesCity && matchesCountry && matchesAgency && matchesDate;
     });
 
     // Reset pagination when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, statusFilter, adventureFilter, cityFilter, countryFilter, agencyFilter, startDate, endDate]);
+    }, [searchTerm, statusFilter, paymentStatusFilter, adventureFilter, cityFilter, countryFilter, agencyFilter, startDate, endDate]);
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
@@ -103,15 +174,13 @@ export const BookingsList: React.FC = () => {
                         <span className="material-symbols-outlined text-lg">print</span>
                         Exportar
                     </button>
-                    <a
-                        href="https://naturisnor.com/naturisnorreservas"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        onClick={() => navigate('/new-booking')}
                         className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark text-background-dark text-sm font-bold tracking-wide gap-2 transition-all shadow-lg shadow-primary/20"
                     >
                         <span className="material-symbols-outlined">add</span>
                         <span>Nova Reserva</span>
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -212,10 +281,9 @@ export const BookingsList: React.FC = () => {
                                 onChange={(e) => setAdventureFilter(e.target.value)}
                             >
                                 <option value="Todas">Todas</option>
-                                <option value="Trilho do Sol">Trilho do Sol</option>
-                                <option value="Kayak no Rio">Kayak no Rio</option>
-                                <option value="Escalada Montanha">Escalada Montanha</option>
-                                <option value="Observação de Aves">Observação de Aves</option>
+                                {allAdventures.map(adventure => (
+                                    <option key={adventure} value={adventure}>{adventure}</option>
+                                ))}
                             </select>
                             <span className={iconClass}>expand_more</span>
                         </div>
@@ -307,11 +375,24 @@ export const BookingsList: React.FC = () => {
                                 currentBookings.map((booking) => (
                                     <tr
                                         key={booking.id}
-                                        onClick={() => navigate(`/bookings/${booking.id}`)}
-                                        className="hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors group"
+                                        className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
                                     >
-                                        <td className="px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">#{booking.id}</td>
-                                        <td className="px-3 py-3">
+                                        <td className="px-3 py-3 cursor-pointer" onClick={() => navigate(`/bookings/${booking.id}`)}>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigator.clipboard.writeText(booking.id);
+                                                    // Optional: Show a toast notification here
+                                                }}
+                                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors group/id"
+                                                title={`ID: ${booking.id}\nClique para copiar`}
+                                            >
+                                                <span className="material-symbols-outlined text-base text-gray-600 dark:text-gray-400 group-hover/id:text-primary">
+                                                    tag
+                                                </span>
+                                            </button>
+                                        </td>
+                                        <td className="px-3 py-3 cursor-pointer" onClick={() => navigate(`/bookings/${booking.id}`)}>
                                             <div className="flex items-center gap-2 max-w-[160px]">
                                                 <div className="size-6 shrink-0 rounded-full bg-primary/20 text-primary-dark dark:text-primary flex items-center justify-center text-[10px] font-bold">
                                                     {booking.clientName.split(' ').map(n => n[0]).join('').substring(0, 2)}
@@ -325,7 +406,7 @@ export const BookingsList: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="px-3 py-3 text-sm text-gray-600 dark:text-gray-300 max-w-[130px] truncate" title={booking.adventureName}>{booking.adventureName}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{booking.startDate}</td>
+                                        <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{formatDatePT(booking.startDate)}</td>
                                         <td className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{booking.time || '-'}</td>
                                         <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[110px] truncate" title={booking.location}>{booking.location || '-'}</td>
                                         <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[80px] truncate" title={booking.country}>{booking.country || '-'}</td>
@@ -338,10 +419,24 @@ export const BookingsList: React.FC = () => {
                                         <td className="px-3 py-3 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">€{booking.totalValue}</td>
                                         <td className="no-print px-3 py-3">
                                             <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button className="p-1 text-gray-500 hover:text-primary transition-colors">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/bookings/${booking.id}`);
+                                                    }}
+                                                    className="p-1 text-gray-500 hover:text-primary transition-colors"
+                                                    title="Ver detalhes"
+                                                >
                                                     <span className="material-symbols-outlined text-base">visibility</span>
                                                 </button>
-                                                <button className="p-1 text-gray-500 hover:text-primary transition-colors">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/bookings/${booking.id}?mode=edit`);
+                                                    }}
+                                                    className="p-1 text-gray-500 hover:text-primary transition-colors"
+                                                    title="Editar reserva"
+                                                >
                                                     <span className="material-symbols-outlined text-base">edit</span>
                                                 </button>
                                             </div>
@@ -381,8 +476,8 @@ export const BookingsList: React.FC = () => {
                                 key={page}
                                 onClick={() => handlePageChange(page)}
                                 className={`px-2 py-1 rounded-md text-xs font-bold transition-colors ${currentPage === page
-                                        ? 'bg-primary text-background-dark'
-                                        : 'border border-gray-200 dark:border-surface-border text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10'
+                                    ? 'bg-primary text-background-dark'
+                                    : 'border border-gray-200 dark:border-surface-border text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10'
                                     }`}
                             >
                                 {page}

@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 
 export const Sidebar = () => {
     const location = useLocation();
-    const { user, logout } = useAuth();
+    const { user, logout, canAccessPage } = useAuth();
 
-    const navItems = [
+    const allNavItems = [
         { label: 'Dashboard', icon: 'dashboard', path: '/' },
         { label: 'Reservas', icon: 'calendar_month', path: '/bookings' },
         { label: 'Calendário', icon: 'event', path: '/calendar' },
@@ -15,6 +15,9 @@ export const Sidebar = () => {
         { label: 'Equipa', icon: 'badge', path: '/staff' },
         { label: 'Análise', icon: 'bar_chart', path: '/analytics' },
     ];
+
+    // Filter navigation items based on user permissions
+    const navItems = allNavItems.filter(item => canAccessPage(item.path));
 
     return (
         <aside className="w-64 flex-shrink-0 bg-background-light dark:bg-[#112215] border-r border-gray-200 dark:border-surface-border flex flex-col h-screen fixed left-0 top-0 z-20 transition-all">

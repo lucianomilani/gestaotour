@@ -17,10 +17,14 @@ export const Login: React.FC = () => {
         setError(null);
 
         try {
-            await login(email);
+            await login(email, password);
             navigate('/');
         } catch (err: any) {
-            setError('Falha ao iniciar sessão. Verifique as suas credenciais.');
+            if (err.code === 'email_not_confirmed') {
+                setError('Email não confirmado. Por favor, verifique a sua caixa de entrada.');
+            } else {
+                setError('Falha ao iniciar sessão. Verifique as suas credenciais.');
+            }
         } finally {
             setLoading(false);
         }
@@ -58,7 +62,7 @@ export const Login: React.FC = () => {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#102215] border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    className="w-full appearance-none pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-[#102215] border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
                                     placeholder="seu.email@naturisnor.com"
                                 />
                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">mail</span>
@@ -78,7 +82,7 @@ export const Login: React.FC = () => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-[#102215] border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                    className="w-full appearance-none pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-[#102215] border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
                                     placeholder="••••••••"
                                 />
                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">lock</span>
