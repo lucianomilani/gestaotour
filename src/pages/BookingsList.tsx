@@ -20,6 +20,8 @@ export const BookingsList: React.FC = () => {
     const [adventureFilter, setAdventureFilter] = useState('Todas');
     const [agencyFilter, setAgencyFilter] = useState('Todas');
     const [countryFilter, setCountryFilter] = useState('Todos');
+
+    // Date Range State
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
@@ -27,18 +29,12 @@ export const BookingsList: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    // Reset pagination when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, statusFilter, paymentStatusFilter, adventureFilter, agencyFilter, countryFilter, startDate, endDate]);
-
+    // Fetch Data
     const fetchData = async () => {
         try {
             setLoading(true);
+
+            // Fetch Bookings
             const { data: bookingsData, error: bookingsError } = await supabase
                 .from('bookings')
                 .select(`
@@ -49,6 +45,18 @@ export const BookingsList: React.FC = () => {
                 .order('created_at', { ascending: false });
 
             if (bookingsError) throw bookingsError;
+
+            // Fetch Adventures for Filter
+            const { data: adventuresData, error: adventuresError } = await supabase
+                .from('adventures')
+                .select('name')
+                .order('name');
+
+            if (adventuresError) throw adventuresError;
+
+            if (adventuresData) {
+                setAllAdventures(adventuresData.map(a => a.name));
+            }
 
             const mappedBookings: Booking[] = (bookingsData || []).map(item => ({
                 id: item.id,
@@ -77,16 +85,55 @@ export const BookingsList: React.FC = () => {
 
             setBookings(mappedBookings);
 
-            // Extract unique adventures
-            const adventures = Array.from(new Set(mappedBookings.map(b => b.adventureName))).sort();
-            setAllAdventures(adventures);
-
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    // Derive Unique Lists for Dropdowns
+    const uniqueAgencies = [...new Set(bookings.map(b => b.agency).filter(Boolean))];
+    const uniqueCountries = [...new Set(bookings.map(b => b.country).filter(Boolean))];
+
+    // Filter Logic
+    const filteredBookings = bookings.filter(booking => {
+        // Text Search (Name, ID)
+        const matchesSearch = booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            booking.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Dropdown Filters
+        const matchesStatus = statusFilter === 'Todos' || booking.status === statusFilter;
+        const matchesPaymentStatus = paymentStatusFilter === 'Todos' || booking.paymentStatus === paymentStatusFilter;
+        const matchesAdventure = adventureFilter === 'Todas' || booking.adventureName === adventureFilter;
+        const matchesAgency = agencyFilter === 'Todas' || booking.agency === agencyFilter;
+        const matchesCountry = countryFilter === 'Todos' || booking.country === countryFilter;
+
+        // Date Range Filter
+        let matchesDate = true;
+        if (startDate || endDate) {
+            const bookingDateISO = booking.startDate;
+            if (startDate && bookingDateISO < startDate) matchesDate = false;
+            if (endDate && bookingDateISO > endDate) matchesDate = false;
+        }
+
+        return matchesSearch && matchesStatus && matchesPaymentStatus && matchesAdventure && matchesAgency && matchesCountry && matchesDate;
+    });
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter, paymentStatusFilter, adventureFilter, agencyFilter, countryFilter, startDate, endDate]);
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentBookings = filteredBookings.slice(startIndex, endIndex);
 
     const getStatusStyle = (status: string) => {
         switch (status) {
@@ -114,61 +161,17 @@ export const BookingsList: React.FC = () => {
         }
     };
 
-    // Filter Logic
-    const filteredBookings = bookings.filter(booking => {
-        const matchesSearch =
-            booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            booking.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (booking.clientEmail && booking.clientEmail.toLowerCase().includes(searchTerm.toLowerCase()));
-
-        const matchesStatus = statusFilter === 'Todos' || booking.status === statusFilter;
-        const matchesPayment = paymentStatusFilter === 'Todos' || booking.paymentStatus === paymentStatusFilter;
-        const matchesAdventure = adventureFilter === 'Todas' || booking.adventureName === adventureFilter;
-        const matchesAgency = agencyFilter === 'Todas' || booking.agency === agencyFilter;
-        const matchesCountry = countryFilter === 'Todos' || booking.country === countryFilter;
-
-        // Date Range Filter
-        let matchesDate = true;
-        if (startDate && endDate) {
-            const bookingDate = new Date(booking.startDate);
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            // Set end date to end of day
-            end.setHours(23, 59, 59, 999);
-            matchesDate = bookingDate >= start && bookingDate <= end;
-        } else if (startDate) {
-            const bookingDate = new Date(booking.startDate);
-            const start = new Date(startDate);
-            matchesDate = bookingDate >= start;
-        } else if (endDate) {
-            const bookingDate = new Date(booking.startDate);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-            matchesDate = bookingDate <= end;
-        }
-
-        return matchesSearch && matchesStatus && matchesPayment && matchesAdventure && matchesAgency && matchesCountry && matchesDate;
-    });
-
-    // Pagination Logic
-    const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentBookings = filteredBookings.slice(startIndex, endIndex);
-
     const handlePageChange = (page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
     };
 
-    // Unique values for filters
-    const uniqueAgencies = Array.from(new Set(bookings.map(b => b.agency))).sort();
-    const uniqueCountries = Array.from(new Set(bookings.map(b => b.country).filter(Boolean))).sort();
-
-    const inputContainerClass = "flex flex-col gap-1";
-    const labelClass = "text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide";
-    const inputClass = "w-full px-3 py-2 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all";
+    // Reusable styles for inputs
+    const inputContainerClass = "w-full";
+    const baseInputClass = "w-full appearance-none py-2.5 bg-white dark:bg-[#102215] border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm";
+    const labelClass = "block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 ml-1";
+    const iconClass = "material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-lg pointer-events-none text-gray-500 dark:text-gray-400";
 
     if (loading) {
         return (
@@ -179,132 +182,177 @@ export const BookingsList: React.FC = () => {
     }
 
     return (
-        <div className="space-y-6 animate-fadeIn">
+        <div className="flex flex-col gap-6 animate-fade-in">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Reservas</h1>
-                    <p className="text-gray-500 dark:text-gray-400">Gerencie todas as reservas do sistema.</p>
+                    <h1 className="text-gray-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Gestão de Reservas</h1>
+                    <p className="text-gray-600 dark:text-[#92c9a0] text-base font-normal mt-1">Visualize e gerencie todas as reservas ativas e passadas.</p>
                 </div>
-                <button
-                    onClick={() => navigate('/bookings/new')}
-                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm"
-                >
-                    <span className="material-symbols-outlined">add</span>
-                    Nova Reserva
-                </button>
+                <div className="no-print flex gap-3">
+                    <button
+                        onClick={() => window.print()}
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-surface-dark border border-gray-200 dark:border-surface-border rounded-lg text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                    >
+                        <span className="material-symbols-outlined text-lg">print</span>
+                        Exportar
+                    </button>
+                    <button
+                        onClick={() => navigate('/bookings/new')}
+                        className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark text-background-dark text-sm font-bold tracking-wide gap-2 transition-all shadow-lg shadow-primary/20"
+                    >
+                        <span className="material-symbols-outlined">add</span>
+                        <span>Nova Reserva</span>
+                    </button>
+                </div>
             </div>
 
-            {/* Filters Section */}
-            <div className="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-200 dark:border-surface-border">
+            {/* Filters Bar - Grid Layout */}
+            <div className="no-print bg-white dark:bg-surface-dark border border-gray-200 dark:border-surface-border rounded-xl p-5 shadow-sm">
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Row 1 */}
+
+                    {/* Row 1 - Search, Adventure, Start Date, End Date */}
+
+                    {/* Search - Icon on LEFT */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Pesquisar</label>
                         <div className="relative">
-                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                             <input
                                 type="text"
-                                placeholder="Nome, Email ou ID..."
+                                placeholder="Nome, ID..."
+                                className={`${baseInputClass} pl-10 pr-4`}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`${inputClass} pl-9`}
                             />
                         </div>
                     </div>
 
+                    {/* Adventure Filter */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Aventura</label>
-                        <select
-                            value={adventureFilter}
-                            onChange={(e) => setAdventureFilter(e.target.value)}
-                            className={inputClass}
-                        >
-                            <option value="Todas">Todas as Aventuras</option>
-                            {allAdventures.map(adv => (
-                                <option key={adv} value={adv}>{adv}</option>
-                            ))}
-                        </select>
+                        <div className="relative">
+                            <select
+                                className={`${baseInputClass} pl-3 pr-10`}
+                                value={adventureFilter}
+                                onChange={(e) => setAdventureFilter(e.target.value)}
+                            >
+                                <option value="Todas">Todas</option>
+                                {allAdventures.map(adventure => (
+                                    <option key={adventure} value={adventure}>{adventure}</option>
+                                ))}
+                            </select>
+                            <span className={iconClass}>expand_more</span>
+                        </div>
                     </div>
 
+                    {/* Start Date */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Data Início</label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            className={inputClass}
-                        />
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className={`${baseInputClass} pl-3 pr-10 dark:scheme-dark`}
+                                placeholder="De"
+                            />
+                            <span className={iconClass}>calendar_today</span>
+                        </div>
                     </div>
 
+                    {/* End Date */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Data Fim</label>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            className={inputClass}
-                        />
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className={`${baseInputClass} pl-3 pr-10 dark:scheme-dark`}
+                                placeholder="Até"
+                            />
+                            <span className={iconClass}>event</span>
+                        </div>
                     </div>
 
-                    {/* Row 2 */}
+                    {/* Row 2 - Agency, Country, Payment Status, Status */}
+
+                    {/* Agency Filter */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Agência</label>
-                        <select
-                            value={agencyFilter}
-                            onChange={(e) => setAgencyFilter(e.target.value)}
-                            className={inputClass}
-                        >
-                            <option value="Todas">Todas as Agências</option>
-                            {uniqueAgencies.map(agency => (
-                                <option key={agency} value={agency}>{agency}</option>
-                            ))}
-                        </select>
+                        <div className="relative">
+                            <select
+                                className={`${baseInputClass} pl-3 pr-10`}
+                                value={agencyFilter}
+                                onChange={(e) => setAgencyFilter(e.target.value)}
+                            >
+                                <option value="Todas">Todas</option>
+                                {uniqueAgencies.map(agency => (
+                                    <option key={agency} value={agency}>{agency}</option>
+                                ))}
+                            </select>
+                            <span className={iconClass}>expand_more</span>
+                        </div>
                     </div>
 
+                    {/* Country Filter */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>País</label>
-                        <select
-                            value={countryFilter}
-                            onChange={(e) => setCountryFilter(e.target.value)}
-                            className={inputClass}
-                        >
-                            <option value="Todos">Todos os Países</option>
-                            {uniqueCountries.map(country => (
-                                <option key={country} value={country}>{country}</option>
-                            ))}
-                        </select>
+                        <div className="relative">
+                            <select
+                                className={`${baseInputClass} pl-3 pr-10`}
+                                value={countryFilter}
+                                onChange={(e) => setCountryFilter(e.target.value)}
+                            >
+                                <option value="Todos">Todos</option>
+                                {uniqueCountries.map(country => (
+                                    <option key={country} value={country}>{country}</option>
+                                ))}
+                            </select>
+                            <span className={iconClass}>expand_more</span>
+                        </div>
                     </div>
 
+                    {/* Payment Status Filter */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Estado Pagamento</label>
-                        <select
-                            value={paymentStatusFilter}
-                            onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                            className={inputClass}
-                        >
-                            <option value="Todos">Todos</option>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Parcial">Parcial</option>
-                            <option value="Concluído">Concluído</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
+                        <div className="relative">
+                            <select
+                                className={`${baseInputClass} pl-3 pr-10`}
+                                value={paymentStatusFilter}
+                                onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                            >
+                                <option value="Todos">Todos</option>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Parcial">Parcial</option>
+                                <option value="Concluido">Concluído</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                            <span className={iconClass}>expand_more</span>
+                        </div>
                     </div>
 
+                    {/* Status Filter */}
                     <div className={inputContainerClass}>
                         <label className={labelClass}>Status</label>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className={inputClass}
-                        >
-                            <option value="Todos">Todos</option>
-                            <option value="Confirmada">Confirmada</option>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Concluída">Concluída</option>
-                            <option value="Cancelada">Cancelada</option>
-                        </select>
+                        <div className="relative">
+                            <select
+                                className={`${baseInputClass} pl-3 pr-10`}
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="Todos">Todos</option>
+                                <option value="Confirmada">Confirmada</option>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Concluída">Concluída</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                            <span className={iconClass}>expand_more</span>
+                        </div>
                     </div>
+
                 </div>
 
                 {/* Clear Filters Button (Visible only if filters are active) */}
@@ -446,42 +494,42 @@ export const BookingsList: React.FC = () => {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-gray-200 dark:border-surface-border flex items-center justify-between">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                            Mostrando <span className="font-medium text-gray-900 dark:text-white">{startIndex + 1}</span> a <span className="font-medium text-gray-900 dark:text-white">{Math.min(endIndex, filteredBookings.length)}</span> de <span className="font-medium text-gray-900 dark:text-white">{filteredBookings.length}</span> resultados
-                        </div>
-                        <div className="flex gap-2">
+                {/* Pagination Footer */}
+                <div className="no-print px-4 py-3 border-t border-gray-200 dark:border-surface-border flex items-center justify-between bg-gray-50 dark:bg-black/20">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                        Mostrando <span className="font-medium text-gray-900 dark:text-white">{filteredBookings.length > 0 ? startIndex + 1 : 0}</span> a <span className="font-medium text-gray-900 dark:text-white">{Math.min(endIndex, filteredBookings.length)}</span> de <span className="font-medium text-gray-900 dark:text-white">{filteredBookings.length}</span>
+                    </p>
+                    <div className="flex gap-2 mx-auto sm:mx-0">
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1 || filteredBookings.length === 0}
+                            className="px-2 py-1 rounded-md border border-gray-200 dark:border-surface-border text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Anterior
+                        </button>
+
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                             <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className="px-3 py-1 text-sm border border-gray-200 dark:border-surface-border rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                key={page}
+                                onClick={() => handlePageChange(page)}
+                                className={`px-2 py-1 rounded-md text-xs font-bold transition-colors ${currentPage === page
+                                    ? 'bg-primary text-background-dark'
+                                    : 'border border-gray-200 dark:border-surface-border text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10'
+                                    }`}
                             >
-                                Anterior
+                                {page}
                             </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${currentPage === page
-                                            ? 'bg-primary text-white'
-                                            : 'border border-gray-200 dark:border-surface-border hover:bg-gray-50 dark:hover:bg-white/5'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className="px-3 py-1 text-sm border border-gray-200 dark:border-surface-border rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Próxima
-                            </button>
-                        </div>
+                        ))}
+
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages || filteredBookings.length === 0}
+                            className="px-2 py-1 rounded-md border border-gray-200 dark:border-surface-border text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Próxima
+                        </button>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
