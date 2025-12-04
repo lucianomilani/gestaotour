@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { Adventure } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const timeOptions = [
     '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00',
@@ -10,6 +11,7 @@ const timeOptions = [
 
 export const AdventuresList: React.FC = () => {
     const { canDelete, companyId } = useAuth();
+    const { showToast, showConfirm } = useToast();
     const [adventures, setAdventures] = useState<Adventure[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +85,7 @@ export const AdventuresList: React.FC = () => {
             setAdventures(mappedAdventures);
         } catch (error) {
             console.error('Error fetching adventures:', error);
-            alert('Erro ao carregar passeios.');
+            showToast('Erro ao carregar passeios.', 'error');
         } finally {
             setLoading(false);
         }
@@ -105,7 +107,42 @@ export const AdventuresList: React.FC = () => {
 
     // Handlers
     const handleDelete = async (id: string) => {
-        if (window.confirm('Tem a certeza que deseja remover este passeio?')) {
+        // Check if adventure is used in bookings
+        try {
+            const { count, error: countError } = await supabase
+                .from('bookings')
+                .select('*', { count: 'exact', head: true })
+                .eq('adventure_id', id);
+
+            if (countError) {
+                showToast('Erro ao verificar dependências.', 'error');
+                return;
+            }
+
+            if (count && count > 0) {
+                await showConfirm({
+                    title: 'Não é Possível Remover',
+                    message: `Este passeio está associado a ${count} reserva${count > 1 ? 's' : ''}. Para manter o histórico, recomendamos desativar o passeio em vez de removê-lo.`,
+                    variant: 'warning',
+                    confirmText: 'Entendi',
+                    cancelText: ''
+                });
+                return;
+            }
+        } catch (error) {
+            showToast('Erro ao verificar dependências.', 'error');
+            return;
+        }
+
+        const confirmed = await showConfirm({
+            title: 'Remover Passeio',
+            message: 'Tem a certeza que deseja remover este passeio? Esta ação não pode ser revertida.',
+            variant: 'danger',
+            confirmText: 'Remover',
+            cancelText: 'Cancelar'
+        });
+
+        if (confirmed) {
             try {
                 const { error } = await supabase
                     .from('adventures')
@@ -115,9 +152,10 @@ export const AdventuresList: React.FC = () => {
                 if (error) throw error;
 
                 setAdventures(adventures.filter(a => a.id !== id));
-            } catch (error) {
+                showToast('Passeio removido com sucesso!', 'success');
+            } catch (error: any) {
                 console.error('Error deleting adventure:', error);
-                alert('Erro ao remover passeio.');
+                showToast(`Erro ao remover: ${error.message || 'Verifique as permissões'}`, 'error');
             }
         }
     };
@@ -234,9 +272,11 @@ export const AdventuresList: React.FC = () => {
             }
 
             setIsModalOpen(false);
+            showToast(modalMode === 'add' ? 'Passeio criado com sucesso!' : 'Passeio atualizado!', 'success');
+            fetchAdventures();
         } catch (error: any) {
             console.error('Error saving adventure:', error);
-            alert(`Erro ao salvar passeio: ${error.message || 'Erro desconhecido'} `);
+            showToast(`Erro ao salvar passeio: ${error.message || 'Erro desconhecido'}`, 'error');
         }
     };
 

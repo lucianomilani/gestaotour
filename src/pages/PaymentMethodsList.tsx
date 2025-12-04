@@ -100,6 +100,37 @@ export const PaymentMethodsList: React.FC = () => {
 
     // Handlers
     const handleDelete = async (id: string) => {
+        // First, check if this payment method is used in any bookings
+        try {
+            const { count, error: countError } = await supabase
+                .from('bookings')
+                .select('*', { count: 'exact', head: true })
+                .eq('payment_method_id', id);
+
+            if (countError) {
+                console.error('Error checking bookings:', countError);
+                showToast('Erro ao verificar dependências.', 'error');
+                return;
+            }
+
+            if (count && count > 0) {
+                // Method is being used, cannot delete
+                await showConfirm({
+                    title: 'Não é Possível Remover',
+                    message: `Este método de pagamento está a ser utilizado em ${count} reserva${count > 1 ? 's' : ''}. Para manter o histórico, recomendamos desativar o método em vez de removê-lo.`,
+                    variant: 'warning',
+                    confirmText: 'Entendi',
+                    cancelText: ''
+                });
+                return;
+            }
+        } catch (error: any) {
+            console.error('Error checking dependencies:', error);
+            showToast('Erro ao verificar dependências.', 'error');
+            return;
+        }
+
+        // No bookings using this method, safe to delete
         const confirmed = await showConfirm({
             title: 'Remover Método de Pagamento',
             message: 'Tem a certeza que deseja remover este método de pagamento? Esta ação não pode ser revertida.',
@@ -115,13 +146,16 @@ export const PaymentMethodsList: React.FC = () => {
                     .delete()
                     .eq('id', id);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase delete error:', error);
+                    throw new Error(error.message || 'Erro desconhecido ao remover');
+                }
 
                 setPaymentMethods(paymentMethods.filter(m => m.id !== id));
                 showToast('Método de pagamento removido com sucesso!', 'success');
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error deleting payment method:', error);
-                showToast('Erro ao remover método de pagamento.', 'error');
+                showToast(`Erro ao remover: ${error.message || 'Verifique as permissões'}`, 'error');
             }
         }
     };

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { Staff } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { createAuthUser, updateAuthUser } from '../services/userService';
 
 export const StaffList: React.FC = () => {
     const { canDelete, isSuperAdmin, companyId } = useAuth();
+    const { showToast, showConfirm } = useToast();
     const [staffList, setStaffList] = useState<Staff[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -117,14 +119,23 @@ export const StaffList: React.FC = () => {
 
     // Handlers
     const handleDelete = async (id: string) => {
-        if (window.confirm('Tem a certeza que deseja remover este colaborador?')) {
+        const confirmed = await showConfirm({
+            title: 'Remover Colaborador',
+            message: 'Tem a certeza que deseja remover este colaborador? Esta ação também removerá o acesso ao sistema.',
+            variant: 'danger',
+            confirmText: 'Remover',
+            cancelText: 'Cancelar'
+        });
+
+        if (confirmed) {
             try {
                 const { error } = await supabase.from('staff').delete().eq('id', id);
                 if (error) throw error;
                 setStaffList(prev => prev.filter(s => s.id !== id));
-            } catch (error) {
+                showToast('Colaborador removido com sucesso!', 'success');
+            } catch (error: any) {
                 console.error('Error deleting staff:', error);
-                alert('Erro ao remover colaborador.');
+                showToast(`Erro ao remover: ${error.message || 'Verifique as permissões'}`, 'error');
             }
         }
     };
@@ -245,8 +256,13 @@ export const StaffList: React.FC = () => {
                 };
 
                 setStaffList(prev => [...prev, newStaff]);
-                alert(`✓ Colaborador criado com sucesso!\n\nLogin: ${currentStaff.email}\nSenha: ${password}\n\nO colaborador já pode fazer login no sistema.`);
+                showToast('Colaborador criado com sucesso!', 'success');
                 setIsModalOpen(false);
+
+                // Show credentials in a second toast
+                setTimeout(() => {
+                    showToast(`Login: ${currentStaff.email} | Senha: ${password}`, 'info', 8000);
+                }, 500);
 
             } else {
                 // Edit mode: update staff profile and optionally password
@@ -267,16 +283,16 @@ export const StaffList: React.FC = () => {
 
                         if (!updateResult.success) {
                             console.error('Error updating password:', updateResult.error);
-                            alert(`⚠ Perfil atualizado, mas houve erro ao alterar a senha: ${updateResult.error}`);
+                            showToast(`Perfil atualizado, mas erro ao alterar senha: ${updateResult.error}`, 'warning');
                         } else {
-                            alert(`✓ Colaborador atualizado com sucesso!${password ? '\n\nNova senha definida.' : ''}`);
+                            showToast(`Colaborador atualizado com sucesso!${password ? ' Nova senha definida.' : ''}`, 'success');
                         }
                     } catch (pwdError) {
                         console.error('Password update error:', pwdError);
-                        alert('⚠ Perfil atualizado, mas não foi possível alterar a senha.');
+                        showToast('Perfil atualizado, mas não foi possível alterar a senha.', 'warning');
                     }
                 } else {
-                    alert('✓ Colaborador atualizado com sucesso!');
+                    showToast('Colaborador atualizado com sucesso!', 'success');
                 }
 
                 setStaffList(prev => prev.map(s => s.id === currentStaff.id ? currentStaff : s));

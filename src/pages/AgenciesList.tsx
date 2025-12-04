@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { Agency } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export const AgenciesList: React.FC = () => {
     const { canDelete, companyId } = useAuth();
+    const { showToast, showConfirm } = useToast();
     const [agencies, setAgencies] = useState<Agency[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -59,7 +61,7 @@ export const AgenciesList: React.FC = () => {
             setAgencies(mappedAgencies);
         } catch (error) {
             console.error('Error fetching agencies:', error);
-            alert('Erro ao carregar agências.');
+            showToast('Erro ao carregar agências.', 'error');
         } finally {
             setLoading(false);
         }
@@ -82,7 +84,42 @@ export const AgenciesList: React.FC = () => {
 
     // Handlers
     const handleDelete = async (id: string) => {
-        if (window.confirm('Tem a certeza que deseja remover esta agência?')) {
+        // Check if agency is used in bookings
+        try {
+            const { count, error: countError } = await supabase
+                .from('bookings')
+                .select('*', { count: 'exact', head: true })
+                .eq('agency_id', id);
+
+            if (countError) {
+                showToast('Erro ao verificar dependências.', 'error');
+                return;
+            }
+
+            if (count && count > 0) {
+                await showConfirm({
+                    title: 'Não é Possível Remover',
+                    message: `Esta agência está associada a ${count} reserva${count > 1 ? 's' : ''}. Para manter o histórico, recomendamos desativar a agência em vez de removê-la.`,
+                    variant: 'warning',
+                    confirmText: 'Entendi',
+                    cancelText: ''
+                });
+                return;
+            }
+        } catch (error) {
+            showToast('Erro ao verificar dependências.', 'error');
+            return;
+        }
+
+        const confirmed = await showConfirm({
+            title: 'Remover Agência',
+            message: 'Tem a certeza que deseja remover esta agência? Esta ação não pode ser revertida.',
+            variant: 'danger',
+            confirmText: 'Remover',
+            cancelText: 'Cancelar'
+        });
+
+        if (confirmed) {
             try {
                 const { error } = await supabase
                     .from('agencies')
@@ -92,9 +129,10 @@ export const AgenciesList: React.FC = () => {
                 if (error) throw error;
 
                 setAgencies(agencies.filter(a => a.id !== id));
-            } catch (error) {
+                showToast('Agência removida com sucesso!', 'success');
+            } catch (error: any) {
                 console.error('Error deleting agency:', error);
-                alert('Erro ao remover agência.');
+                showToast(`Erro ao remover: ${error.message || 'Verifique as permissões'}`, 'error');
             }
         }
     };
@@ -175,9 +213,11 @@ export const AgenciesList: React.FC = () => {
             }
 
             setIsModalOpen(false);
+            showToast(modalMode === 'add' ? 'Agência criada com sucesso!' : 'Agência atualizada!', 'success');
+            fetchAgencies();
         } catch (error: any) {
             console.error('Error saving agency:', error);
-            alert(`Erro ao salvar agência: ${error.message || 'Erro desconhecido'}`);
+            showToast(`Erro ao salvar agência: ${error.message || 'Erro desconhecido'}`, 'error');
         }
     };
 

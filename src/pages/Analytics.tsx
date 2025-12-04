@@ -444,6 +444,25 @@ export const Analytics: React.FC = () => {
 
 
                 </div>
+
+                {/* Clear Filters Button (Visible only if filters are active) */}
+                {(period !== 'Últimos 3 meses' || adventureFilter !== 'Todas' || agencyFilter !== 'Todas' || paymentStatusFilter !== 'Todos' || statusFilter !== 'Todos') && (
+                    <div className="flex justify-end mt-4 pt-3 border-t border-gray-100 dark:border-white/5">
+                        <button
+                            onClick={() => {
+                                setPeriod('Últimos 3 meses');
+                                setAdventureFilter('Todas');
+                                setAgencyFilter('Todas');
+                                setPaymentStatusFilter('Todos');
+                                setStatusFilter('Todos');
+                            }}
+                            className="text-xs font-bold text-red-500 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-sm">close</span>
+                            Limpar Filtros
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* KPI Cards */}

@@ -4,11 +4,13 @@ import { formatDatePT } from '../utils/dateFormat';
 import { supabase } from '../services/supabase';
 import { Booking } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { getCountryFlag } from '../utils/countryFlags';
 
 export const BookingsList: React.FC = () => {
     const navigate = useNavigate();
     const { canEdit } = useAuth();
+    const { showToast } = useToast();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [allAdventures, setAllAdventures] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
@@ -405,20 +407,32 @@ export const BookingsList: React.FC = () => {
                                         key={booking.id}
                                         className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
                                     >
-                                        <td className="px-3 py-3 cursor-pointer" onClick={() => navigate(`/bookings/${booking.id}`)}>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    navigator.clipboard.writeText(booking.id);
-                                                    // Optional: Show a toast notification here
-                                                }}
-                                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors group/id"
-                                                title={`ID: ${booking.id}\nClique para copiar`}
-                                            >
-                                                <span className="material-symbols-outlined text-base text-gray-600 dark:text-gray-400 group-hover/id:text-primary">
-                                                    tag
-                                                </span>
-                                            </button>
+                                        <td className="px-3 py-3">
+                                            <div className="group/tooltip relative inline-block">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigator.clipboard.writeText(booking.id);
+                                                        showToast('ID copiado para a área de transferência!', 'success', 2000);
+                                                    }}
+                                                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-primary/10 dark:hover:bg-primary/20 transition-all group/id"
+                                                >
+                                                    <span className="material-symbols-outlined text-base text-gray-600 dark:text-gray-400 group-hover/id:text-primary transition-colors">
+                                                        tag
+                                                    </span>
+                                                </button>
+
+                                                {/* Custom Tooltip */}
+                                                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 z-50 pointer-events-none">
+                                                    <div className="bg-gray-900 dark:bg-gray-700 text-white px-3 py-2 rounded-lg shadow-xl border border-gray-700 dark:border-gray-600 whitespace-nowrap">
+                                                        <div className="text-[10px] font-mono text-gray-300 mb-0.5">ID da Reserva:</div>
+                                                        <div className="text-xs font-bold mb-1">{booking.id}</div>
+                                                        <div className="text-[10px] text-orange-400 font-medium">Clicar para copiar</div>
+                                                    </div>
+                                                    {/* Arrow */}
+                                                    <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-4 border-r-gray-900 dark:border-r-gray-700"></div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-3 py-3 cursor-pointer" onClick={() => navigate(`/bookings/${booking.id}`)}>
                                             <div className="flex items-center gap-2 max-w-[160px]">
