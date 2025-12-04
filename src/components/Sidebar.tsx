@@ -5,16 +5,27 @@ import { supabase } from '../services/supabase';
 
 export const Sidebar = () => {
     const location = useLocation();
-    const { user, logout, canAccessPage, isSuperAdmin } = useAuth();
+    const { user, logout, canAccessPage, isSuperAdmin, companyId } = useAuth();
     const [companySettings, setCompanySettings] = React.useState<{ name: string; logoUrl: string } | null>(null);
 
     React.useEffect(() => {
         const fetchCompanySettings = async () => {
+            if (!companyId) {
+                console.log('No companyId available yet');
+                return;
+            }
+
             try {
-                const { data } = await supabase
+                const { data, error } = await supabase
                     .from('company_settings')
                     .select('name, logo_url')
+                    .eq('id', companyId)
                     .single();
+
+                if (error) {
+                    console.error('Error fetching company settings:', error);
+                    return;
+                }
 
                 if (data) {
                     setCompanySettings({
@@ -28,7 +39,7 @@ export const Sidebar = () => {
         };
 
         fetchCompanySettings();
-    }, []);
+    }, [companyId]);
 
     const mainNavItems = [
         { label: 'Dashboard', icon: 'dashboard', path: '/' },
