@@ -126,8 +126,8 @@ export const BookingDetails: React.FC = () => {
                 const paymentMethodsData = await fetchActivePaymentMethods();
                 setPaymentMethods(paymentMethodsData);
 
-                // Fetch Booking if ID exists
-                if (id) {
+                // Fetch Booking if ID exists and is not 'new'
+                if (id && id !== 'new') {
                     console.log('Fetching booking with ID:', id);
                     const { data: booking, error } = await supabase
                         .from('bookings')
@@ -142,7 +142,9 @@ export const BookingDetails: React.FC = () => {
 
                     if (error) {
                         console.error('Supabase error:', error);
-                        throw error;
+                        showToast(`Erro ao carregar reserva: ${error.message}`, 'error');
+                        navigate('/bookings');
+                        return;
                     }
 
                     console.log('Booking data received:', booking);
@@ -200,7 +202,7 @@ export const BookingDetails: React.FC = () => {
             } catch (error: any) {
                 console.error('Error fetching data:', error);
                 console.error('Error details:', error.message, error.details, error.hint);
-                alert(`Erro ao carregar dados: ${error.message || 'Erro desconhecido'}`);
+                showToast(`Erro ao carregar dados: ${error.message || 'Erro desconhecido'}`, 'error');
             } finally {
                 setLoading(false);
             }

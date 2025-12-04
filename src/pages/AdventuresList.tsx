@@ -454,8 +454,8 @@ export const AdventuresList: React.FC = () => {
             {/* Modal for Adding/Editing Adventure */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in overflow-y-auto">
-                    <div className="bg-white dark:bg-surface-dark w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-200 dark:border-surface-border overflow-hidden my-8">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-surface-border bg-gray-50 dark:bg-black/20">
+                    <div className="bg-white dark:bg-surface-dark w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-200 dark:border-surface-border overflow-hidden my-8 max-h-[95vh] flex flex-col">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-surface-border bg-gray-50 dark:bg-black/20 flex-shrink-0">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                                 {modalMode === 'add' ? 'Adicionar Novo Passeio' : 'Editar Passeio'}
                             </h2>
@@ -464,7 +464,7 @@ export const AdventuresList: React.FC = () => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto flex-1">
 
                             {/* Basic Info */}
                             <div className="col-span-1 md:col-span-2">

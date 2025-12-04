@@ -200,10 +200,10 @@ export const BookingsList: React.FC = () => {
                         Exportar
                     </button>
                     <button
-                        onClick={() => navigate('/bookings/new')}
-                        className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark text-background-dark text-sm font-bold tracking-wide gap-2 transition-all shadow-lg shadow-primary/20"
+                        onClick={() => navigate('/new-booking')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-background-dark font-bold text-sm hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
                     >
-                        <span className="material-symbols-outlined">add</span>
+                        <span className="material-symbols-outlined text-lg">add</span>
                         <span>Nova Reserva</span>
                     </button>
                 </div>

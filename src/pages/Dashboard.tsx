@@ -212,10 +212,10 @@ export const Dashboard: React.FC = () => {
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <button
-            onClick={() => navigate('/bookings/new')}
-            className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark text-background-dark text-sm font-bold tracking-wide gap-2 transition-all shadow-lg shadow-primary/20"
+            onClick={() => navigate('/new-booking')}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-background-dark font-bold text-sm hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
           >
-            <span className="material-symbols-outlined">add</span>
+            <span className="material-symbols-outlined text-lg">add</span>
             <span>Nova Reserva</span>
           </button>
         </div>
@@ -415,7 +415,7 @@ export const Dashboard: React.FC = () => {
             </button>
             <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
             <button
-              onClick={() => navigate('/bookings')}
+              onClick={() => navigate('/new-booking')}
               className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors pb-1"
             >
               <span>Todas as Reservas</span>

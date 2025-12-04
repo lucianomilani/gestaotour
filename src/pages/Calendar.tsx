@@ -138,10 +138,10 @@ export const Calendar: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => navigate('/bookings/new')}
-                        className="flex items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary-dark text-background-dark text-sm font-bold tracking-wide gap-2 transition-all shadow-lg shadow-primary/20"
+                        onClick={() => navigate('/new-booking')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-background-dark font-bold text-sm hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
                     >
-                        <span className="material-symbols-outlined">add</span>
+                        <span className="material-symbols-outlined text-lg">add</span>
                         <span>Nova Reserva</span>
                     </button>
                 </div>
@@ -218,10 +218,11 @@ export const Calendar: React.FC = () => {
                                         {/* Add Button on Hover */}
                                         <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
-                                                onClick={() => navigate('/bookings/new')}
-                                                className="p-1 rounded-full bg-gray-100 dark:bg-white/10 hover:bg-primary hover:text-background-dark text-gray-500 dark:text-gray-400 transition-colors"
+                                                onClick={() => navigate('/new-booking')}
+                                                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-primary text-background-dark rounded-lg hover:bg-primary-dark transition-colors text-sm font-bold"
                                             >
-                                                <span className="material-symbols-outlined text-sm block">add</span>
+                                                <span className="material-symbols-outlined text-base">add</span>
+                                                Nova Reserva
                                             </button>
                                         </div>
                                     </div>
