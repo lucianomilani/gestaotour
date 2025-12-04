@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { PaymentMethod } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export const PaymentMethodsList: React.FC = () => {
     const { canDelete, companyId } = useAuth();
+    const { showToast, showConfirm } = useToast();
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,7 +77,7 @@ export const PaymentMethodsList: React.FC = () => {
             setPaymentMethods(mappedMethods);
         } catch (error) {
             console.error('Error fetching payment methods:', error);
-            alert('Erro ao carregar métodos de pagamento.');
+            showToast('Erro ao carregar métodos de pagamento.', 'error');
         } finally {
             setLoading(false);
         }
@@ -98,7 +100,15 @@ export const PaymentMethodsList: React.FC = () => {
 
     // Handlers
     const handleDelete = async (id: string) => {
-        if (window.confirm('Tem a certeza que deseja remover este método de pagamento?')) {
+        const confirmed = await showConfirm({
+            title: 'Remover Método de Pagamento',
+            message: 'Tem a certeza que deseja remover este método de pagamento? Esta ação não pode ser revertida.',
+            variant: 'danger',
+            confirmText: 'Remover',
+            cancelText: 'Cancelar'
+        });
+
+        if (confirmed) {
             try {
                 const { error } = await supabase
                     .from('payment_methods')
@@ -108,9 +118,10 @@ export const PaymentMethodsList: React.FC = () => {
                 if (error) throw error;
 
                 setPaymentMethods(paymentMethods.filter(m => m.id !== id));
+                showToast('Método de pagamento removido com sucesso!', 'success');
             } catch (error) {
                 console.error('Error deleting payment method:', error);
-                alert('Erro ao remover método de pagamento.');
+                showToast('Erro ao remover método de pagamento.', 'error');
             }
         }
     };
@@ -220,10 +231,11 @@ export const PaymentMethodsList: React.FC = () => {
             }
 
             setIsModalOpen(false);
+            showToast(modalMode === 'add' ? 'Método de pagamento criado com sucesso!' : 'Método de pagamento atualizado!', 'success');
             fetchPaymentMethods(); // Refresh to get updated data
         } catch (error: any) {
             console.error('Error saving payment method:', error);
-            alert(`Erro ao salvar método de pagamento: ${error.message || 'Erro desconhecido'}`);
+            showToast(`Erro ao salvar método de pagamento: ${error.message || 'Erro desconhecido'}`, 'error');
         }
     };
 
